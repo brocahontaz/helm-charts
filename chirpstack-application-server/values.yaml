@@ -1,7 +1,3 @@
-# Default values for chirpstack-application-server.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
-
 replicaCount: 1
 
 image:
@@ -9,10 +5,16 @@ image:
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
+  pullSecrets: []
 
-imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
+
+containerPorts:
+  uiPort: 8080
+  joinPort: 8003
+  httpPort: 8001
+  monitoringPort: 8101
 
 serviceAccount:
   # Specifies whether a service account should be created
@@ -39,18 +41,10 @@ securityContext: {}
 service:
   type: ClusterIP
   ports:
-    - name: ui-port
-      servicePort: 8080
-      containerPort: 8080
-    - name: join-port
-      servicePport: 8003
-      containerPort: 8003
-    - name: http-port
-      port: 8001
-      targetPort: 8001
-    - name: monitoring-port
-      port: 8101
-      targetPort: 8101
+    uiPort: 8080
+    joinPort: 8003
+    httpPort: 8001
+    monitoringPort: 8101
 
 ingress:
   enabled: false
