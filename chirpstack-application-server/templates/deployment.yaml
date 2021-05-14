@@ -5,9 +5,7 @@ metadata:
   labels:
     {{- include "chirpstack-application-server.labels" . | nindent 4 }}
 spec:
-{{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
-{{- end }}
   selector:
     matchLabels:
       {{- include "chirpstack-application-server.selectorLabels" . | nindent 6 }}
@@ -56,6 +54,10 @@ spec:
               port: http-port
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: chirpstack-application-server
+              mountPath: /etc/chirpstack-application-server/chirpstack-application-server.toml
+              subPath: chirpstack-application-server.toml
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -68,3 +70,7 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      volumes:
+        - name: chirpstack-application-server
+          configMap:
+            name: chirpstack-application-server

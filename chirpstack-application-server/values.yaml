@@ -8,6 +8,36 @@ image:
 nameOverride: ""
 fullnameOverride: ""
 
+config:
+  general:
+    logging:
+      logLevel: 4
+      syslog: "false"
+    passwordHashIterations: 100000
+    grpc:
+      resolverScheme:
+        default: "passthrough"
+  postgres:
+    dsn: {}
+    automigrate: {}
+    connections:
+      maxOpen: {}
+      maxIdle: {}
+  redis: 
+    servers: []
+    password: {}
+    databaseIndex: {}
+    cluster: 
+      enabled: {}
+      masterName: {}
+      pool_size: {}
+    tls:
+      enabled: {}
+    keyPrefix: {}
+  application: {}
+  metrics: {}
+  
+
 containerPorts:
   uiPort: 8080
   joinPort: 8003
@@ -44,19 +74,6 @@ service:
     httpPort: 8001
     monitoringPort: 8101
 
-ingress:
-  enabled: false
-  annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
-  hosts:
-    - host: chart-example.local
-      paths: []
-  tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
-
 resources: {}
   # limits:
   #   cpu: 100m
@@ -64,13 +81,6 @@ resources: {}
   # requests:
   #   cpu: 100m
   #   memory: 128Mi
-
-autoscaling:
-  enabled: false
-  minReplicas: 1
-  maxReplicas: 100
-  targetCPUUtilizationPercentage: 80
-  # targetMemoryUtilizationPercentage: 80
 
 nodeSelector: {}
 
