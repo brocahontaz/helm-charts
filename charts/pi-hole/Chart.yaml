@@ -1,0 +1,14 @@
+apiVersion: v2
+name: pi-hole
+description: A Helm chart for pi-hole
+type: application
+version: 1.0.0
+maintainers:
+  - name: Johan Andersson
+    email: contact@johanandersson.se
+    url: www.johanandersson.se
+keywords:
+  - pi-hole
+#dependencies:
+#  - name: shared
+#   version: 1.0.0

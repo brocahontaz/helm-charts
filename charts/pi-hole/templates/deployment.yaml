@@ -1,0 +1,146 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "pi-hole.name" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "pi-hole.labels" . | nindent 4 }}
+  {{- if .Values.chaos.enabled }}
+    kube-monkey/enabled: enabled
+    kube-monkey/identifier: {{ include "pi-hole.name" . }}
+    kube-monkey/mtbf: {{ .Values.chaos.config.mtbf | quote }}
+    kube-monkey/kill-mode: {{ .Values.chaos.config.killMode }}
+    kube-monkey/kill-value: {{ .Values.chaos.config.killValue | quote }}
+  {{- end }}
+  {{- if .Values.commonLabels }}
+    {{- include "pi-hole.tplvalues.render" (dict "value" .Values.commonLabels "context" $) | nindent 4 }}
+  {{- end }}
+  annotations:
+  {{- with .Values.global.annotations }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- if .Values.commonAnnotations }}
+    {{- include "pi-hole.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+{{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+{{- end }}
+  selector:
+    matchLabels:
+      {{- include "pi-hole.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+      {{- if .Values.global.rollAll.enabled }}
+        rollme: {{ randAlphaNum 5 | quote }}
+      {{- end }}
+      {{- with .Values.global.annotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.podAnnotations }}
+        {{- include "pi-hole.tplvalues.render" ( dict "value" .Values.podAnnotations "context" $) | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "pi-hole.selectorLabels" . | nindent 8 }}
+      {{- if .Values.chaos.enabled }}
+        kube-monkey/enabled: enabled
+        kube-monkey/identifier: {{ include "pi-hole.name" . }}
+        kube-monkey/mtbf: {{ .Values.chaos.config.mtbf | quote }}
+        kube-monkey/kill-mode: {{ .Values.chaos.config.killMode }}
+        kube-monkey/kill-value: {{ .Values.chaos.config.killValue | quote }}
+      {{- end }}
+      {{- if .Values.podLabels }}
+        {{- include "pi-hole.tplvalues.render" (dict "value" .Values.podLabels "context" $) | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- if or .Values.hostAliases.enabled .Values.global.hostAliases.enabled }}
+      hostAliases:
+      {{- if .Values.hostAliases.enabled }}
+        {{- range .Values.hostAliases.hosts }}
+        - ip: {{ .ip }}
+          hostnames:
+            {{- range .hostnames }}
+              - {{ . | quote }}
+            {{- end }}
+        {{- end }}
+      {{- end }}
+      {{- if .Values.global.hostAliases.enabled }}
+        {{- range .Values.global.hostAliases.hosts }}
+        - ip: {{ .ip }}
+          hostnames:
+            {{- range .hostnames }}
+              - {{ . | quote }}
+            {{- end }}
+        {{- end }}
+      {{- end }}
+      {{- end }}
+      {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "pi-hole.serviceAccountName" . }}
+      {{- if .Values.podSecurityContext.enabled }}
+      securityContext: {{- omit .Values.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.initContainers }}
+      initContainers:
+      {{- include "pi-hole.tplvalues.render" ( dict "value" . "context" $ ) | nindent 8}}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: {{ include "pi-hole.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if .Values.command }}
+          command: {{- include "pi-hole.tplvalues.render" (dict "value" .Values.command "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.args }}
+          args: {{- include "pi-hole.tplvalues.render" (dict "value" .Values.args "context" $) | nindent 12 }}
+          {{- end }}
+          {{- with .Values.envVars }}
+          env:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.targetPort }}
+              protocol: TCP
+          {{- if .Values.startupProbe.enabled }}
+          startupProbe: {{- omit .Values.startupProbe "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if .Values.livenessProbe.enabled }}
+          livenessProbe: {{- omit .Values.livenessProbe "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if .Values.readinessProbe.enabled }}
+          readinessProbe: {{- omit .Values.readinessProbe "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- with .Values.extraVolumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if .Values.resources.enabled }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          {{- end }}
+        {{- if .Values.sidecars }}
+        {{- include "pi-hole.tplvalues.render" (dict "value" .Values.sidecars "context" $) | nindent 8 }}
+        {{- end }}
+      {{- with .Values.extraVolumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

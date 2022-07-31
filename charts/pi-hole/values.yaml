@@ -1,0 +1,343 @@
+## Default values for pi-hole.
+## This is a YAML-formatted file.
+## Declare variables to be passed into your templates.
+## Using inheritance with the namespace-specific values files.
+## Do not override these defaults if you do not know what you are doing! This may affect ALL deployments.
+
+## @section Common parameters
+
+## @param nameOverride String to partially override pi-hole.fullname
+##
+nameOverride: ""
+## @param fullnameOverride String to fully override pi-hole.fullname
+##
+fullnameOverride: ""
+## @param commonLabels Add labels to all the deployed resources
+##
+commonLabels: {}
+## @param commonAnnotations Add annotations to all the deployed resources
+##
+commonAnnotations: {}
+
+## @section pi-hole parameters
+
+## pi-hole image version
+## 
+## @param image.registry pi-hole image registry
+## @param image.repository astro clock image repository
+## @param image.tag pi-hole image tag
+## @param image.pullPolicy pi-hole image pull policy
+## @param image.pullSecrets Specify docker-registry secret names as an array
+##
+image:
+  registry: ""
+  repository: pihole
+  ## Overrides the image tag whose default is the chart appVersion.
+  tag: "2022.07.1"
+  ## Specify an imagePullPolicy
+  ## Defaults to 'Always' if tag is 'latest', else set to 'IfNotPresent'
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+
+## Command and args for running the container
+## @param command Override default container command
+## @param args Override default container args
+##
+command: []
+args: []
+
+## Environment variables for the pi-hole containers
+## @param envVars environment variables
+## Example:
+## envVars:
+##   - name: FOO
+##     value: "bar"
+##
+envVars: 
+  - name: TZ
+    value: "Europe/Stockholm"
+  - name: WEBPASSWORD
+    value: redacted
+  - name: FTLCONF_REPLY_ADDR4
+    value: redacted
+
+ports:
+  - name: http-web-interface
+    port: 80
+    protocol: TCP
+  - name: dns-tcp
+    port: 53
+    protocol: TCP
+  - name: dns-udp
+    port: 53
+    protocol: 53
+  - name: dhcp-udp
+    port: 67
+    protocol: UDP
+
+## @section Exposure parameters
+
+## Service configuration
+## @param service.type Kubernetes service type
+## @param service.port Service port
+## @param service.targetPort Service target port
+## @param service.externalTrafficPolicy Enable client source IP preservation
+## @param service.annotations Annotations for pi-hole service
+##
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: http-web-interface
+  externalTrafficPolicy: Cluster
+  sessionAffinity: None
+  annotations: {}
+  
+## @section pi-hole deployment/replicaset parameters
+
+## @param replicaCount Number of pi-hole replicas to deploy
+##
+replicaCount: 1
+
+## @param podLabels Labels for pi-hole pods
+##
+podLabels: {}
+
+## @param podAnnotations Annotations for pi-hole pods
+##
+podAnnotations: {}
+
+## @param extraVolumes Optionally specify extra list of additional volumes for pi-hole pods
+##
+extraVolumes: []
+
+## @param extraVolumeMounts Optionally specify extra list of additional volumeMounts for pi-hole pods
+##
+extraVolumeMounts: []
+
+## @param initContainers Add additional init containers to the pi-hole pods
+## Example:
+## initContainers:
+##   - name: your-image-name
+##     image: your-image
+##     imagePullPolicy: always
+##     ports:
+##       - name: portname
+##         containerPort: 1234
+##
+initContainers: []
+
+## @param sidecars Add additional sidecar containers to the pi-hole pods
+## Example:
+## sidecars:
+##   - name: your-image-name
+##     image: your-image
+##     imagePullPolicy: always
+##     ports:
+##       - name: portname
+##         containerPort: 1234
+##
+sidecars: []
+
+## pi-hole pods' SecurityContext
+## @param podSecurityContext.enabled Enable pi-hole pods' Security Context
+## @param podSecurityContext.fsGroup Set pi-hole pods' Security Context fsGroup
+##
+podSecurityContext: 
+  enabled: false
+  fsGroup: 2000
+
+## pi-hole containers' SecurityContext
+## @param containerSecurityContext.enabled Enable pi-hole containers' Security Context
+## @param containerSecurityContext.readOnlyRootFilesystem Set pi-hole containers' readOnlyRootFilesystem
+## @param containerSecurityContext.runAsNonRoot Set pi-hole containers' runAsNonRoot
+## @param containerSecurityContext.runAsUser Set pi-hole containers' runAsUser
+##
+containerSecurityContext: 
+  enabled: false
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
+
+## pi-hole resource requests and limits
+## @param resources.enabled Enable pi-hole container resource configuration
+## @param resources.limits The resources limits for the pi-hole container
+## @param resources.requests The requested resources for the pi-hole container
+resources: 
+  enabled: false
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+## Configure options for startup probe
+## @param startupProbe.enabled Enable startupProbe
+## @param startupProbe.httpGet.path Request path for startupProbe
+## @param startupProbe.httpGet.port Port for startupProbe
+## @param startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
+## @param startupProbe.periodSeconds Period seconds for startupProbe
+## @param startupProbe.timeoutSeconds Timeout seconds for startupProbe
+## @param startupProbe.failureThreshold Failure threshold for startupProbe
+## @param startupProbe.successThreshold Success threshold for startupProbe
+##
+startupProbe:
+  enabled: false
+  httpGet:
+    path: /live
+    port: health
+  initialDelaySeconds: 30
+  periodSeconds: 5
+  timeoutSeconds: 1
+  failureThreshold: 60
+  successThreshold: 1
+
+## Configure options for liveness probe
+## @param livenessProbe.enabled Enable livenessProbe
+## @param livenessProbe.httpGet.path Request path for livenessProbe
+## @param livenessProbe.httpGet.port Port for livenessProbe
+## @param livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+## @param livenessProbe.periodSeconds Period seconds for livenessProbe
+## @param livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+## @param livenessProbe.failureThreshold Failure threshold for livenessProbe
+## @param livenessProbe.successThreshold Success threshold for livenessProbe
+##
+livenessProbe:
+  enabled: false
+  httpGet:
+    path: /live
+    port: health
+  initialDelaySeconds: 300
+  periodSeconds: 5
+  timeoutSeconds: 1
+  failureThreshold: 3
+  successThreshold: 1
+
+## Configure options for readiness probe
+## @param readinessProbe.enabled Enable readinessProbe
+## @param readinessProbe.httpGet.path Request path for readinessProbe
+## @param readinessProbe.httpGet.port Port for readinessProbe
+## @param readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
+## @param readinessProbe.periodSeconds Period seconds for readinessProbe
+## @param readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+## @param readinessProbe.failureThreshold Failure threshold for readinessProbe
+## @param readinessProbe.successThreshold Success threshold for readinessProbe
+##
+readinessProbe:
+  enabled: false
+  httpGet:
+    path: /live
+    port: health
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 1
+  failureThreshold: 3
+  successThreshold: 1
+
+## Strategy to use to update pods
+## @param updateStrategy.type StrategyType
+## RollingUpdate or OnDelete
+## 
+updateStrategy:
+  type: RollingUpdate
+
+## @param affinity Affinity for pod assignment
+##
+affinity: {}
+
+## @param nodeSelector Node labels for pod assignment
+##
+nodeSelector: {}
+
+## @param tolerations Tolerations for pod assignment
+##
+tolerations: []
+
+## Inject custom host aliases
+## @param hostAliases.enabled enable custom host aliases injection
+## @param hosts custom host aliases to inject
+## Example:
+## hostAliases:
+##    enabled: true
+##    hosts:
+##      - ip: 123.123.123.123
+##        hostnames:
+##          - my.host.one
+##          - my.host.two
+##
+hostAliases:
+  enabled: false
+
+## @section RBAC parameters
+
+## Specifies wheter a ServiceAccount should be created
+## @param serviceAccount.create Enable the creation of a ServiceAccount for pi-hole pods
+## @param serviceAccount.name Name of the created ServiceAccount
+## If not set and create is true, a name is generated using the fullname template
+## @param serviceAccount.annotations Annotations to add to the service account
+##
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+## @section Persistence
+
+## pi-hole persistence configuration
+## @param persistence.enabled Enable pi-hole data persistence using PVC
+## @param persistence.storageClass PVC storage class for pi-hole data volume
+## @param persistence.selector Selector to match an existing Persistent Volume
+## @param persistence.accessMode PVC Access Mode for pi-hole data volume
+## @param persistence.existingClaim Provide an existing PersistentVolumeClaim
+## @param persistence.size PVC Storage Request for pi-hole data volume
+## @param persistence.volumes Additional volumes without creating PVC
+## @param persistence.annotations Persistence annotations, evaluated as a template
+##
+persistence:
+  enabled: false
+  storageClass: ""
+  selector: {}
+  accessMode: ReadWriteOnce
+  existingClaim: {}
+  size: 8Gi
+  volumes: []
+  annotations: {}
+
+## @section Other parameters
+
+## pi-hole Pod Disruption Budget configuration
+## @param pdb.create Enable/disable a Pod Disruption Budget creation
+## @param pdb.minAvailable Minimum number/percentage of pods that should remain scheduled
+## @param pdb.maxUnavailable Maximum number/percentage of pods that may be unavailable
+##
+pdb:
+  create: false
+  minAvailable: 1
+  maxUnavailable: ""
+
+## pi-hole Autoscaling configuration
+## @param autoscaling.enabled Enable autoscaling for pi-hole
+## @param autoscaling.minReplicas Minimum number of pi-hole replicas
+## @param autoscaling.maxReplicas Maximum number of pi-hole replicas
+## @param autoscaling.targetCPUUtilizationPercentage Target CPU utilization percentage
+## @param targetMemoryUtilizationPercentage Target memory utilization percentage
+##
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 11
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+## pi-hole chaos monkey testing configuration
+## @param chaos.enabled Enable pi-hole chaos monkey testing
+## @param chaos.config.mtbf pi-hole chaos mtbf
+## @param chaos.config.killMode pi-hole chaos kill mode
+## @param chaos.config.killValue pi-hole chaos kill value
+##
+chaos:
+  enabled: false
+  config:
+    mtbf: '2'
+    killMode: "fixed"
+    killValue: '1'
