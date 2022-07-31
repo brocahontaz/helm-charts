@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "chirpstack-application-server.name" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "chirpstack-application-server.labels" . | nindent 4 }}
+  annotations:
+  {{- with .Values.global.annotations }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- if .Values.commonAnnotations }}
+    {{- include "yggio.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.service.annotations }}
+    {{- include "yggio.tplvalues.render" ( dict "value" .Values.service.annoations "context" $) | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.service.type }}
+  {{- if (or (eq .Values.service.type "LoadBalancer") (eq .Values.service.type "NodePort")) }}
+  externalTrafficPolicy: {{ .Values.service.externalTrafficPolicy | quote }}
+  {{- end }}
+  sessionAffinity: {{ .Values.service.sessionAffinity }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.targetPort }}
+      protocol: TCP
+      name: http
+    {{- if .Values.metrics.enabled }}
+    - port: {{ .Values.metrics.service.port.number }}
+      targetPort: {{ .Values.metrics.service.port.targetPort }}
+      protocol: TCP
+      name: {{ .Values.metrics.service.port.name }}
+    {{- end }}
+  selector:
+    {{- include "chirpstack-application-server.selectorLabels" . | nindent 4 }}

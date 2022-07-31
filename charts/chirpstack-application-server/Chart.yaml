@@ -1,0 +1,14 @@
+apiVersion: v2
+name: chirpstack-application-server
+description: A Helm chart for chirpstack-application-server
+type: application
+version: 1.0.0
+appVersion: 3.17.6
+deprecated: false
+maintainers:
+  - name: Johan Andersson
+    email: contact@johanandersson.se
+    url: www.johanandersson.se
+keywords:
+  - chirpstack-application-server
+  - chirpstack
