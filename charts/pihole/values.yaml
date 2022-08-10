@@ -85,12 +85,35 @@ ports:
 ## @param service.annotations Annotations for pihole service
 ##
 service:
-  type: ClusterIP
-  port: 80
-  targetPort: http-web
-  externalTrafficPolicy: Cluster
-  sessionAffinity: None
-  annotations: {}
+  web:
+    type: ClusterIP
+    ports:
+      - name: http-web
+        port: 80
+        targetPort: http-web
+        protocol: TCP
+    externalTrafficPolicy: Cluster
+    sessionAffinity: None
+    annotations: {}
+  dns:
+    type: NodePort
+    ports:
+      - name: dns-tcp
+        port: 53
+        targetPort: dns-tcp
+        protocol: TCP
+      - name: dns-udp
+        port: 53
+        targetPort: dns-udp
+        protocol: UDP
+      - name: dhcp-udp
+        port: 67
+        targetPort: dhcp-udp
+        protocol: UDP
+    externalTrafficPolicy: Cluster
+    sessionAffinity: None
+    annotations: {}
+
 
 ## Ingress configuration
 ##

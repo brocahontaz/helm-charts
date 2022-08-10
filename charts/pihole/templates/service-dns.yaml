@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "pihole.name" . }}-dns
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "pihole.labels" . | nindent 4 }}
+  annotations:
+  {{- if .Values.commonAnnotations }}
+    {{- include "yggio.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.service.dns.annotations }}
+    {{- include "yggio.tplvalues.render" ( dict "value" .Values.service.dns.annoations "context" $) | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.service.dns.type }}
+  {{- if (or (eq .Values.service.dns.type "LoadBalancer") (eq .Values.service.dns.type "NodePort")) }}
+  externalTrafficPolicy: {{ .Values.service.dns.externalTrafficPolicy | quote }}
+  {{- end }}
+  sessionAffinity: {{ .Values.service.dns.sessionAffinity }}
+  ports:
+    {{- with .Values.service.dns.ports }}
+      {{- toYaml  . | nindent 4 }}
+    {{- end }}
+  selector:
+    {{- include "pihole.selectorLabels" . | nindent 4 }}

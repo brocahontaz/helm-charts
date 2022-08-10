@@ -9,19 +9,18 @@ metadata:
   {{- if .Values.commonAnnotations }}
     {{- include "yggio.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
-  {{- if .Values.service.annotations }}
-    {{- include "yggio.tplvalues.render" ( dict "value" .Values.service.annoations "context" $) | nindent 4 }}
+  {{- if .Values.service.web.annotations }}
+    {{- include "yggio.tplvalues.render" ( dict "value" .Values.service.web.annoations "context" $) | nindent 4 }}
   {{- end }}
 spec:
-  type: {{ .Values.service.type }}
-  {{- if (or (eq .Values.service.type "LoadBalancer") (eq .Values.service.type "NodePort")) }}
-  externalTrafficPolicy: {{ .Values.service.externalTrafficPolicy | quote }}
+  type: {{ .Values.service.web.type }}
+  {{- if (or (eq .Values.service.web.type "LoadBalancer") (eq .Values.service.web.type "NodePort")) }}
+  externalTrafficPolicy: {{ .Values.service.web.externalTrafficPolicy | quote }}
   {{- end }}
-  sessionAffinity: {{ .Values.service.sessionAffinity }}
+  sessionAffinity: {{ .Values.service.web.sessionAffinity }}
   ports:
-    - port: {{ .Values.service.port }}
-      targetPort: {{ .Values.service.targetPort }}
-      protocol: TCP
-      name: http
+    {{- with .Values.service.web.ports }}
+      {{- toYaml  . | nindent 4 }}
+    {{- end }}
   selector:
     {{- include "pihole.selectorLabels" . | nindent 4 }}
