@@ -1,7 +1,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "pi-hole.name" -}}
+{{- define "pihole.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
@@ -10,7 +10,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "pi-hole.fullname" -}}
+{{- define "pihole.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -26,16 +26,16 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "pi-hole.chart" -}}
+{{- define "pihole.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "pi-hole.labels" -}}
-helm.sh/chart: {{ include "pi-hole.chart" . }}
-{{ include "pi-hole.selectorLabels" . }}
+{{- define "pihole.labels" -}}
+helm.sh/chart: {{ include "pihole.chart" . }}
+{{ include "pihole.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -46,35 +46,35 @@ app.kubernetes.io/part-of: Yggio
 {{/*
 Selector labels
 */}}
-{{- define "pi-hole.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "pi-hole.name" . }}
+{{- define "pihole.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "pihole.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "pi-hole.serviceAccountName" -}}
+{{- define "pihole.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
-{{- default (include "pi-hole.fullname" .) .Values.serviceAccount.name }}
+{{- default (include "pihole.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
 
 {{/*
-Return the proper pi-hole image name
+Return the proper pihole image name
 */}}
-{{- define "pi-hole.image" -}}
+{{- define "pihole.image" -}}
 {{ include "shared.images.image" (dict "imageRoot" .Values.image "global" .Values.global "appVersion" .Chart.AppVersion) }}
 {{- end -}}
 
 {{/*
 Renders a value that contains template.
 Usage:
-{{ include "shared.tplvalues.render" ( dict "value" .Values.path.to.the.Value "context" $) }}
+{{ include "pihole.tplvalues.render" ( dict "value" .Values.path.to.the.Value "context" $) }}
 */}}
-{{- define "shared.tplvalues.render" -}}
+{{- define "pihole.tplvalues.render" -}}
   {{- if typeIs "string" .value }}
     {{- tpl .value .context }}
   {{- else }}

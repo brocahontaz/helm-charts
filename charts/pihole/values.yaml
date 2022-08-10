@@ -1,4 +1,4 @@
-## Default values for pi-hole.
+## Default values for pihole.
 ## This is a YAML-formatted file.
 ## Declare variables to be passed into your templates.
 ## Using inheritance with the namespace-specific values files.
@@ -6,10 +6,10 @@
 
 ## @section Common parameters
 
-## @param nameOverride String to partially override pi-hole.fullname
+## @param nameOverride String to partially override pihole.fullname
 ##
 nameOverride: ""
-## @param fullnameOverride String to fully override pi-hole.fullname
+## @param fullnameOverride String to fully override pihole.fullname
 ##
 fullnameOverride: ""
 ## @param commonLabels Add labels to all the deployed resources
@@ -19,18 +19,18 @@ commonLabels: {}
 ##
 commonAnnotations: {}
 
-## @section pi-hole parameters
+## @section pihole parameters
 
-## pi-hole image version
+## pihole image version
 ## 
-## @param image.registry pi-hole image registry
+## @param image.registry pihole image registry
 ## @param image.repository astro clock image repository
-## @param image.tag pi-hole image tag
-## @param image.pullPolicy pi-hole image pull policy
+## @param image.tag pihole image tag
+## @param image.pullPolicy pihole image pull policy
 ## @param image.pullSecrets Specify docker-registry secret names as an array
 ##
 image:
-  registry: ""
+  registry: "pihole"
   repository: pihole
   ## Overrides the image tag whose default is the chart appVersion.
   tag: "2022.07.1"
@@ -46,7 +46,7 @@ image:
 command: []
 args: []
 
-## Environment variables for the pi-hole containers
+## Environment variables for the pihole containers
 ## @param envVars environment variables
 ## Example:
 ## envVars:
@@ -62,17 +62,17 @@ envVars:
     value: redacted
 
 ports:
-  - name: http-web-interface
-    port: 80
+  - name: http-web
+    containerPort: 80
     protocol: TCP
   - name: dns-tcp
-    port: 53
+    containerPort: 53
     protocol: TCP
   - name: dns-udp
-    port: 53
-    protocol: 53
+    containerPort: 53
+    protocol: UDP
   - name: dhcp-udp
-    port: 67
+    containerPort: 67
     protocol: UDP
 
 ## @section Exposure parameters
@@ -82,39 +82,53 @@ ports:
 ## @param service.port Service port
 ## @param service.targetPort Service target port
 ## @param service.externalTrafficPolicy Enable client source IP preservation
-## @param service.annotations Annotations for pi-hole service
+## @param service.annotations Annotations for pihole service
 ##
 service:
   type: ClusterIP
   port: 80
-  targetPort: http-web-interface
+  targetPort: http-web
   externalTrafficPolicy: Cluster
   sessionAffinity: None
   annotations: {}
-  
-## @section pi-hole deployment/replicaset parameters
 
-## @param replicaCount Number of pi-hole replicas to deploy
+## Ingress configuration
+##
+##
+##
+ingress:
+  enabled: true
+  ingressClassName:
+  spec:
+    domain: rooterserver
+    path: /admin
+    pathType: Prefix
+    service: pihole
+    servicePort: 80
+  
+## @section pihole deployment/replicaset parameters
+
+## @param replicaCount Number of pihole replicas to deploy
 ##
 replicaCount: 1
 
-## @param podLabels Labels for pi-hole pods
+## @param podLabels Labels for pihole pods
 ##
 podLabels: {}
 
-## @param podAnnotations Annotations for pi-hole pods
+## @param podAnnotations Annotations for pihole pods
 ##
 podAnnotations: {}
 
-## @param extraVolumes Optionally specify extra list of additional volumes for pi-hole pods
+## @param extraVolumes Optionally specify extra list of additional volumes for pihole pods
 ##
 extraVolumes: []
 
-## @param extraVolumeMounts Optionally specify extra list of additional volumeMounts for pi-hole pods
+## @param extraVolumeMounts Optionally specify extra list of additional volumeMounts for pihole pods
 ##
 extraVolumeMounts: []
 
-## @param initContainers Add additional init containers to the pi-hole pods
+## @param initContainers Add additional init containers to the pihole pods
 ## Example:
 ## initContainers:
 ##   - name: your-image-name
@@ -126,7 +140,7 @@ extraVolumeMounts: []
 ##
 initContainers: []
 
-## @param sidecars Add additional sidecar containers to the pi-hole pods
+## @param sidecars Add additional sidecar containers to the pihole pods
 ## Example:
 ## sidecars:
 ##   - name: your-image-name
@@ -138,19 +152,19 @@ initContainers: []
 ##
 sidecars: []
 
-## pi-hole pods' SecurityContext
-## @param podSecurityContext.enabled Enable pi-hole pods' Security Context
-## @param podSecurityContext.fsGroup Set pi-hole pods' Security Context fsGroup
+## pihole pods' SecurityContext
+## @param podSecurityContext.enabled Enable pihole pods' Security Context
+## @param podSecurityContext.fsGroup Set pihole pods' Security Context fsGroup
 ##
 podSecurityContext: 
   enabled: false
   fsGroup: 2000
 
-## pi-hole containers' SecurityContext
-## @param containerSecurityContext.enabled Enable pi-hole containers' Security Context
-## @param containerSecurityContext.readOnlyRootFilesystem Set pi-hole containers' readOnlyRootFilesystem
-## @param containerSecurityContext.runAsNonRoot Set pi-hole containers' runAsNonRoot
-## @param containerSecurityContext.runAsUser Set pi-hole containers' runAsUser
+## pihole containers' SecurityContext
+## @param containerSecurityContext.enabled Enable pihole containers' Security Context
+## @param containerSecurityContext.readOnlyRootFilesystem Set pihole containers' readOnlyRootFilesystem
+## @param containerSecurityContext.runAsNonRoot Set pihole containers' runAsNonRoot
+## @param containerSecurityContext.runAsUser Set pihole containers' runAsUser
 ##
 containerSecurityContext: 
   enabled: false
@@ -158,10 +172,10 @@ containerSecurityContext:
   runAsNonRoot: true
   runAsUser: 1000
 
-## pi-hole resource requests and limits
-## @param resources.enabled Enable pi-hole container resource configuration
-## @param resources.limits The resources limits for the pi-hole container
-## @param resources.requests The requested resources for the pi-hole container
+## pihole resource requests and limits
+## @param resources.enabled Enable pihole container resource configuration
+## @param resources.limits The resources limits for the pihole container
+## @param resources.requests The requested resources for the pihole container
 resources: 
   enabled: false
   limits:
@@ -271,7 +285,7 @@ hostAliases:
 ## @section RBAC parameters
 
 ## Specifies wheter a ServiceAccount should be created
-## @param serviceAccount.create Enable the creation of a ServiceAccount for pi-hole pods
+## @param serviceAccount.create Enable the creation of a ServiceAccount for pihole pods
 ## @param serviceAccount.name Name of the created ServiceAccount
 ## If not set and create is true, a name is generated using the fullname template
 ## @param serviceAccount.annotations Annotations to add to the service account
@@ -283,29 +297,25 @@ serviceAccount:
 
 ## @section Persistence
 
-## pi-hole persistence configuration
-## @param persistence.enabled Enable pi-hole data persistence using PVC
-## @param persistence.storageClass PVC storage class for pi-hole data volume
+## pihole persistence configuration
+## @param persistence.enabled Enable pihole data persistence using PVC
+## @param persistence.storageClass PVC storage class for pihole data volume
 ## @param persistence.selector Selector to match an existing Persistent Volume
-## @param persistence.accessMode PVC Access Mode for pi-hole data volume
-## @param persistence.existingClaim Provide an existing PersistentVolumeClaim
-## @param persistence.size PVC Storage Request for pi-hole data volume
-## @param persistence.volumes Additional volumes without creating PVC
+## @param persistence.accessMode PVC Access Mode for pihole data volume
+## @param persistence.size PVC Storage Request for pihole data volume
 ## @param persistence.annotations Persistence annotations, evaluated as a template
 ##
 persistence:
-  enabled: false
-  storageClass: ""
+  enabled: true
+  storageClass: local-path
   selector: {}
   accessMode: ReadWriteOnce
-  existingClaim: {}
-  size: 8Gi
-  volumes: []
+  size: 1Gi
   annotations: {}
 
 ## @section Other parameters
 
-## pi-hole Pod Disruption Budget configuration
+## pihole Pod Disruption Budget configuration
 ## @param pdb.create Enable/disable a Pod Disruption Budget creation
 ## @param pdb.minAvailable Minimum number/percentage of pods that should remain scheduled
 ## @param pdb.maxUnavailable Maximum number/percentage of pods that may be unavailable
@@ -315,10 +325,10 @@ pdb:
   minAvailable: 1
   maxUnavailable: ""
 
-## pi-hole Autoscaling configuration
-## @param autoscaling.enabled Enable autoscaling for pi-hole
-## @param autoscaling.minReplicas Minimum number of pi-hole replicas
-## @param autoscaling.maxReplicas Maximum number of pi-hole replicas
+## pihole Autoscaling configuration
+## @param autoscaling.enabled Enable autoscaling for pihole
+## @param autoscaling.minReplicas Minimum number of pihole replicas
+## @param autoscaling.maxReplicas Maximum number of pihole replicas
 ## @param autoscaling.targetCPUUtilizationPercentage Target CPU utilization percentage
 ## @param targetMemoryUtilizationPercentage Target memory utilization percentage
 ##
@@ -329,11 +339,11 @@ autoscaling:
   targetCPUUtilizationPercentage: 80
   targetMemoryUtilizationPercentage: 80
 
-## pi-hole chaos monkey testing configuration
-## @param chaos.enabled Enable pi-hole chaos monkey testing
-## @param chaos.config.mtbf pi-hole chaos mtbf
-## @param chaos.config.killMode pi-hole chaos kill mode
-## @param chaos.config.killValue pi-hole chaos kill value
+## pihole chaos monkey testing configuration
+## @param chaos.enabled Enable pihole chaos monkey testing
+## @param chaos.config.mtbf pihole chaos mtbf
+## @param chaos.config.killMode pihole chaos kill mode
+## @param chaos.config.killValue pihole chaos kill value
 ##
 chaos:
   enabled: false

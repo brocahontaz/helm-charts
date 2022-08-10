@@ -1,14 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "pi-hole.name" . }}
+  name: {{ include "pihole.name" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "pi-hole.labels" . | nindent 4 }}
+    {{- include "pihole.labels" . | nindent 4 }}
   annotations:
-  {{- with .Values.global.annotations }}
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
   {{- if .Values.commonAnnotations }}
     {{- include "yggio.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
@@ -27,4 +24,4 @@ spec:
       protocol: TCP
       name: http
   selector:
-    {{- include "pi-hole.selectorLabels" . | nindent 4 }}
+    {{- include "pihole.selectorLabels" . | nindent 4 }}
